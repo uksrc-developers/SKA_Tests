@@ -1,0 +1,28 @@
+import os
+
+import reframe as rfm
+from reframe.core.builtins import sanity_function
+import reframe.utility.sanity as sn
+
+from benchmarks.modules.utils import ContainerTest
+
+
+@rfm.simple_test
+class STARSimagecutoutsastropy(ContainerTest):
+    bench_name="STARS_imagecutoutsastropy"
+    valid_systems = ["-low_memory"]
+    tags = {"stars"}
+    container_image = "docker://registry.gitlab.com/ska-telescope/src/src-workloads/image-cutouts-astropy"
+
+    container_precmd += "cd /scripts\nln -s /astro-cutouts/examples /examples\n"
+    container_cmd = "python3 /scripts/cutouts.py --format png --geometry 3x3 /examples/Sources.lis"
+
+    reference_time = -1.0
+
+    @sanity_function
+    def validate(self):
+        if getattr(self.current_partition.scheduler, 'container_scheduler', False):
+            return super().validate()
+        return sn.all([
+            super().validate(),
+        ])

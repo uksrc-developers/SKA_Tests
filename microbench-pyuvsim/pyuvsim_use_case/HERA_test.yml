@@ -1,0 +1,18 @@
+filing:
+  clobber: true
+  outdir: results_data/
+  outfile_name: gleam-field-1-HERA_test_pulsar-pyuvsim-sm_test
+  output_format: uvh5
+freq:
+  Nfreqs: 4
+  channel_width: 23761.8986858
+  start_freq: 158304048.743
+sources:
+  catalog: catalog_files/gleam-field-1-158.30-167.10-MHz-nf-38-fov-12.9-pld-mean-2.82-std-0.19.skymodel.txt
+telescope:
+  array_layout: telescope_config/hex-37-14.6m.csv
+  telescope_config_name: telescope_config/hex-37-14.6m-gauss-fwhm9.3.yml
+time:
+  Ntimes: 360
+  integration_time: 11
+  start_time: 2458098.304401821
