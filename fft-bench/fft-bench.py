@@ -66,7 +66,7 @@ class FftBenmchmarkBase(SpackTest):
         ])
 
     @run_before("performance")
-    def output_list_dict(self):
+    def collect_measurements(self):
         """
         In order to use the database handler perflog 'swiftdb', self.output_dict_list must be defined.
         This dictionary should include at least:
@@ -77,27 +77,21 @@ class FftBenmchmarkBase(SpackTest):
         if getattr(self.current_partition.scheduler, 'container_scheduler', False):
             return
         pattern = r'(?P<Library>\S+), (?P<Mem_Size>\S+), (?P<ExecutionTime>\S+),'
-        output_list = sn.extractall(pattern,
+        rows = sn.extractall(pattern,
                                     pathlib.Path(self.outputdir) / self.output_file,
                                     ['Library', 'Mem_Size', 'ExecutionTime'],
                                     [str, float, float])
-        time_of_test = str(dt.now().strftime("%Y-%m-%d-%H:%M"))
+        self.measurements += [
+            {'check_perf_test_library': lib, 'check_perf_test_array_size_mb': size, 'check_perf_test_execution_time_s': t}
+            for lib, size, t in rows
+        ]
 
-        for output in output_list:
-            self.output_dict_list += [
-                {
-                    "TimeOfTest": time_of_test,
-                    "SystemPartition": f"{os.environ.get('GH_RUNNER')} - {self.current_system.name} - {self.current_partition.name}",
-                    "Library": output[0],
-                    "ArraySizeMB": output[1],
-                    "ExecutionTime":output[2]
-                }
-            ]
+        print(self.measurements)
         return
 
-    @performance_function('notAmetric')
-    def dummy_perf(self):
-        return 1
+#    @performance_function('NoUnits')
+#    def no_individual_output(self):
+#        return 1
 
 
 @rfm.simple_test
