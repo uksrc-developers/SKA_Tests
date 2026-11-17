@@ -52,9 +52,7 @@ class FftBenmchmarkBase(SpackTest):
     @run_after('compile')
     def set_container_cmd(self):
         self.output_file = os.path.join(self.outputdir, self.output_file)
-        import inspect
-        path = inspect.getfile(type(self))
-        self.container_cmd = f'reframe --system=default -S in_container=True -c {self.container_path}/{path[path.find("benchmarks/apps"):]} -n {type(self).__name__} -S {type(self).__name__}.transform_count={self.transform_count} -S {type(self).__name__}.repeat_count={self.repeat_count} -r'
+        self.container_cmd = f'reframe --system=default -S in_container=True -c {self.container_path}/benchmarks/SKA_Tests/fft-bench -n {type(self).__name__} -S {type(self).__name__}.transform_count={self.transform_count} -S {type(self).__name__}.repeat_count={self.repeat_count} -r'
 
     @sanity_function
     def validate(self):
@@ -74,18 +72,17 @@ class FftBenmchmarkBase(SpackTest):
         - SystemPartition [str]
         - <Desired Output variables> [Format Determinable]
         """
-        if getattr(self.current_partition.scheduler, 'container_scheduler', False):
-            return
+        #if getattr(self.current_partition.scheduler, 'container_scheduler', False):
+        #    return
         pattern = r'(?P<Library>\S+), (?P<Mem_Size>\S+), (?P<ExecutionTime>\S+),'
         rows = sn.extractall(pattern,
                                     pathlib.Path(self.outputdir) / self.output_file,
                                     ['Library', 'Mem_Size', 'ExecutionTime'],
                                     [str, float, float])
         self.measurements += [
-            {'check_perf_test_library': lib, 'check_perf_test_array_size_mb': size, 'check_perf_test_execution_time_s': t}
+            {'check_perf_test_library': lib, 'check_perf_test_array_size_mb': size, 'check_perf_test_execution_time_s': t*0.001}
             for lib, size, t in rows
         ]
-
         print(self.measurements)
         return
 
@@ -108,7 +105,7 @@ class FftBenchmarkCPU(FftBenmchmarkBase):
     # -c int = Number of times to repeat the transforms, for averaging times.
     output_file = 'FFTW_only.txt'
     in_container_outputfile = output_file
-    # container_cmd = reframe --system=default -c /opt/uksrc-excalibur-tests/benchmarks/apps/fft-bench -n FftBenchmarkCPU -S FftBenchmarkCPU.transform_count=2 -S FftBenchmarkCPU.repeat_count=2 -r
+    # container_cmd = reframe --system=default -c /opt/uksrc-excalibur-tests/benchmarks/SKA_Tests/fft-bench -n FftBenchmarkCPU -S FftBenchmarkCPU.transform_count=2 -S FftBenchmarkCPU.repeat_count=2 -r
 
     @run_before('setup')
     def setup_variables(self):
